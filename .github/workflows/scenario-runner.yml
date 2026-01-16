@@ -123,7 +123,7 @@ jobs:
           # named: PURPLE_AGENT_API_KEY (or specific keys like OPENROUTER_API_KEY)
           
           # Run purple agent - API key must be baked into image or provided by submitter
-          docker run --rm \
+          timeout 600 docker run --rm \
             --name purple-agent \
             --network host \
             -e OPENROUTER_API_KEY="${{ secrets.PURPLE_AGENT_API_KEY }}" \
@@ -136,6 +136,7 @@ jobs:
             --green-url http://localhost:9009 \
             --levels level-0 \
             --max-iterations 1 \
+            --timeout 300 \
             --no-llm-validation \
             --output /home/agent/results/evaluation_results.json || true
           
