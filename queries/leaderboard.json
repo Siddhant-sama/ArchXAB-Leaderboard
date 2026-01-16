@@ -1,0 +1,157 @@
+{
+  "leaderboard_queries": [
+    {
+      "id": "main_ranking",
+      "name": "Main Leaderboard",
+      "description": "Ranking of purple agents by weighted score and pass rate",
+      "sql": "SELECT ROW_NUMBER() OVER (ORDER BY weighted_score DESC) as rank, purple_agent_name, total_tasks_evaluated, tasks_passed, ROUND(pass_rate * 100, 2) as pass_rate_pct, ROUND(weighted_score, 2) as weighted_score, best_submission_timestamp FROM (SELECT purple_agent_name, COUNT(DISTINCT task_id) as total_tasks_evaluated, COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) as tasks_passed, CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) AS FLOAT) / COUNT(DISTINCT task_id) as pass_rate, ROUND(SUM(CASE WHEN task_passed = true THEN difficulty_weight ELSE 0 END) / SUM(difficulty_weight), 2) as weighted_score, MAX(submission_timestamp) as best_submission_timestamp FROM assessment_results WHERE submission_status = 'completed' GROUP BY purple_agent_name) leaderboard_data ORDER BY weighted_score DESC, pass_rate DESC",
+      "columns": [
+        { "name": "rank", "type": "integer", "label": "Rank" },
+        { "name": "purple_agent_name", "type": "string", "label": "Agent Name" },
+        { "name": "total_tasks_evaluated", "type": "integer", "label": "Tasks Evaluated" },
+        { "name": "tasks_passed", "type": "integer", "label": "Tasks Passed" },
+        { "name": "pass_rate_pct", "type": "float", "label": "Pass Rate (%)" },
+        { "name": "weighted_score", "type": "float", "label": "Weighted Score" },
+        { "name": "best_submission_timestamp", "type": "timestamp", "label": "Best Score Date" }
+      ],
+      "sort_by": "weighted_score",
+      "sort_order": "DESC",
+      "display_type": "table"
+    },
+    {
+      "id": "task_performance_time",
+      "name": "Task Performance & Time",
+      "description": "Purple agent task performance considering time used and success rate (as per YouTube tutorial)",
+      "sql": "SELECT purple_agent_name, task_id, difficulty_level, task_passed, evaluation_time_seconds, CASE WHEN task_passed = true THEN 'PASS' ELSE 'FAIL' END as status, ROUND(evaluation_time_seconds::float / 300 * 100, 1) as time_used_pct, submission_timestamp FROM assessment_results WHERE submission_status = 'completed' ORDER BY purple_agent_name, evaluation_time_seconds DESC",
+      "columns": [
+        { "name": "purple_agent_name", "type": "string", "label": "Agent" },
+        { "name": "task_id", "type": "string", "label": "Task ID" },
+        { "name": "difficulty_level", "type": "string", "label": "Level" },
+        { "name": "status", "type": "string", "label": "Result" },
+        { "name": "evaluation_time_seconds", "type": "float", "label": "Time (sec)" },
+        { "name": "time_used_pct", "type": "float", "label": "Time %% of Budget" },
+        { "name": "submission_timestamp", "type": "timestamp", "label": "Submitted" }
+      ],
+      "sort_by": "time_used_pct",
+      "sort_order": "DESC",
+      "display_type": "table"
+    },
+    {
+      "id": "per_level_performance",
+      "name": "Performance by Difficulty Level",
+      "description": "How each purple agent performs on each difficulty level",
+      "sql": "SELECT purple_agent_name, difficulty_level, COUNT(DISTINCT task_id) as tasks_in_level, COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) as tasks_passed_in_level, ROUND(CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) AS FLOAT) / COUNT(DISTINCT task_id) * 100, 2) as pass_rate_pct, ROUND(AVG(evaluation_time_seconds), 1) as avg_eval_time_sec FROM assessment_results WHERE submission_status = 'completed' GROUP BY purple_agent_name, difficulty_level ORDER BY purple_agent_name, difficulty_level",
+      "columns": [
+        { "name": "purple_agent_name", "type": "string", "label": "Agent" },
+        { "name": "difficulty_level", "type": "string", "label": "Level" },
+        { "name": "tasks_in_level", "type": "integer", "label": "Total Tasks" },
+        { "name": "tasks_passed_in_level", "type": "integer", "label": "Passed" },
+        { "name": "pass_rate_pct", "type": "float", "label": "Pass Rate (%)" },
+        { "name": "avg_eval_time_sec", "type": "float", "label": "Avg Time (sec)" }
+      ],
+      "sort_by": "pass_rate_pct",
+      "sort_order": "DESC",
+      "display_type": "heatmap"
+    },
+    {
+      "id": "submission_history",
+      "name": "Submission History & Score Progression",
+      "description": "Timeline of all submissions showing progressive improvement",
+      "sql": "SELECT submission_timestamp, purple_agent_name, tasks_passed, total_tasks_evaluated, ROUND(CAST(tasks_passed AS FLOAT) / total_tasks_evaluated * 100, 2) as pass_rate_pct, ROUND(weighted_score, 2) as weighted_score, github_commit_sha, github_actor FROM (SELECT MAX(submission_timestamp) as submission_timestamp, purple_agent_name, COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) as tasks_passed, COUNT(DISTINCT task_id) as total_tasks_evaluated, SUM(CASE WHEN task_passed = true THEN difficulty_weight ELSE 0 END) / SUM(difficulty_weight) as weighted_score, github_commit_sha, github_actor FROM assessment_results GROUP BY submission_id, purple_agent_name, github_commit_sha, github_actor) submission_summary ORDER BY submission_timestamp DESC",
+      "columns": [
+        { "name": "submission_timestamp", "type": "timestamp", "label": "Submitted" },
+        { "name": "purple_agent_name", "type": "string", "label": "Agent" },
+        { "name": "tasks_passed", "type": "integer", "label": "Passed" },
+        { "name": "total_tasks_evaluated", "type": "integer", "label": "Total" },
+        { "name": "pass_rate_pct", "type": "float", "label": "Pass Rate (%)" },
+        { "name": "weighted_score", "type": "float", "label": "Score" },
+        { "name": "github_actor", "type": "string", "label": "Submitted By" }
+      ],
+      "sort_by": "submission_timestamp",
+      "sort_order": "DESC",
+      "display_type": "line_chart"
+    },
+    {
+      "id": "task_difficulty_analysis",
+      "name": "Task Difficulty Analysis",
+      "description": "Which tasks are hardest/easiest and which agents solve them",
+      "sql": "SELECT task_id, difficulty_level, difficulty_weight, COUNT(DISTINCT CASE WHEN task_passed = true THEN purple_agent_name END) as agents_passed_count, COUNT(DISTINCT purple_agent_name) as total_attempts, ROUND(CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN purple_agent_name END) AS FLOAT) / COUNT(DISTINCT purple_agent_name) * 100, 2) as pass_rate_pct, ROUND(AVG(evaluation_time_seconds), 2) as avg_eval_time_sec FROM assessment_results WHERE submission_status = 'completed' GROUP BY task_id, difficulty_level, difficulty_weight ORDER BY pass_rate_pct ASC, difficulty_weight DESC",
+      "columns": [
+        { "name": "task_id", "type": "string", "label": "Task" },
+        { "name": "difficulty_level", "type": "string", "label": "Level" },
+        { "name": "difficulty_weight", "type": "integer", "label": "Weight" },
+        { "name": "agents_passed_count", "type": "integer", "label": "Agents Passed" },
+        { "name": "total_attempts", "type": "integer", "label": "Total Attempts" },
+        { "name": "pass_rate_pct", "type": "float", "label": "Pass Rate (%)" },
+        { "name": "avg_eval_time_sec", "type": "float", "label": "Avg Time (sec)" }
+      ],
+      "sort_by": "pass_rate_pct",
+      "sort_order": "ASC",
+      "display_type": "table"
+    },
+    {
+      "id": "best_performers_by_level",
+      "name": "Best Performers by Level",
+      "description": "Top agent for each difficulty level",
+      "sql": "SELECT DISTINCT difficulty_level, purple_agent_name, level_pass_rate, level_rank FROM (SELECT difficulty_level, purple_agent_name, ROUND(CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) AS FLOAT) / COUNT(DISTINCT task_id) * 100, 2) as level_pass_rate, ROW_NUMBER() OVER (PARTITION BY difficulty_level ORDER BY COUNT(CASE WHEN task_passed = true THEN task_id END) DESC) as level_rank FROM assessment_results WHERE submission_status = 'completed' GROUP BY difficulty_level, purple_agent_name) ranked WHERE level_rank = 1 ORDER BY difficulty_level",
+      "columns": [
+        { "name": "difficulty_level", "type": "string", "label": "Level" },
+        { "name": "purple_agent_name", "type": "string", "label": "Top Agent" },
+        { "name": "level_pass_rate", "type": "float", "label": "Pass Rate (%)" }
+      ],
+      "sort_by": "difficulty_level",
+      "sort_order": "ASC",
+      "display_type": "table"
+    },
+    {
+      "id": "recent_activity",
+      "name": "Recent Submissions",
+      "description": "Last 20 submissions across all agents",
+      "sql": "SELECT submission_timestamp, purple_agent_name, tasks_passed, total_tasks, ROUND(CAST(tasks_passed AS FLOAT) / total_tasks * 100, 2) as pass_rate_pct, ROUND(weighted_score, 2) as score, github_actor, submission_status FROM (SELECT submission_timestamp, purple_agent_name, SUM(CASE WHEN task_passed = true THEN 1 ELSE 0 END) as tasks_passed, COUNT(*) as total_tasks, SUM(CASE WHEN task_passed = true THEN difficulty_weight ELSE 0 END) / SUM(difficulty_weight) as weighted_score, github_actor, submission_status, ROW_NUMBER() OVER (PARTITION BY submission_id ORDER BY submission_timestamp DESC) as rn FROM assessment_results GROUP BY submission_timestamp, purple_agent_name, github_actor, submission_status, submission_id) recent WHERE rn = 1 ORDER BY submission_timestamp DESC LIMIT 20",
+      "columns": [
+        { "name": "submission_timestamp", "type": "timestamp", "label": "Submitted" },
+        { "name": "purple_agent_name", "type": "string", "label": "Agent" },
+        { "name": "tasks_passed", "type": "integer", "label": "Passed" },
+        { "name": "total_tasks", "type": "integer", "label": "Total" },
+        { "name": "pass_rate_pct", "type": "float", "label": "Pass Rate (%)" },
+        { "name": "score", "type": "float", "label": "Score" },
+        { "name": "github_actor", "type": "string", "label": "By" }
+      ],
+      "sort_by": "submission_timestamp",
+      "sort_order": "DESC",
+      "display_type": "table"
+    },
+    {
+      "id": "speed_vs_accuracy",
+      "name": "Speed vs Accuracy Trade-off",
+      "description": "Time efficiency vs pass rate - agents optimizing for speed vs correctness",
+      "sql": "SELECT purple_agent_name, COUNT(DISTINCT task_id) as tasks_evaluated, COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) as tasks_passed, ROUND(CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) AS FLOAT) / COUNT(DISTINCT task_id) * 100, 2) as pass_rate_pct, ROUND(AVG(evaluation_time_seconds), 1) as avg_time_sec, ROUND(MIN(evaluation_time_seconds), 1) as min_time_sec, ROUND(MAX(evaluation_time_seconds), 1) as max_time_sec FROM assessment_results WHERE submission_status = 'completed' GROUP BY purple_agent_name ORDER BY pass_rate_pct DESC",
+      "columns": [
+        { "name": "purple_agent_name", "type": "string", "label": "Agent" },
+        { "name": "tasks_evaluated", "type": "integer", "label": "Tasks" },
+        { "name": "tasks_passed", "type": "integer", "label": "Passed" },
+        { "name": "pass_rate_pct", "type": "float", "label": "Pass Rate (%)" },
+        { "name": "avg_time_sec", "type": "float", "label": "Avg Time (sec)" },
+        { "name": "min_time_sec", "type": "float", "label": "Min Time (sec)" },
+        { "name": "max_time_sec", "type": "float", "label": "Max Time (sec)" }
+      ],
+      "sort_by": "pass_rate_pct",
+      "sort_order": "DESC",
+      "display_type": "scatter"
+    }
+  ],
+  "metadata": {
+    "benchmark": "ArchXGreen RTL Synthesis",
+    "total_tasks": 71,
+    "difficulty_levels": 9,
+    "evaluation_tools": ["Icarus Verilog", "Yosys"],
+    "features": [
+      "dynamic_loading",
+      "feedback_generation",
+      "architectural_validation",
+      "ppa_metrics"
+    ],
+    "created": "2026-01-16",
+    "version": "1.0.0"
+  }
+}
