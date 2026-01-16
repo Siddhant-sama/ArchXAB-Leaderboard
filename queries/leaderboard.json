@@ -19,7 +19,7 @@
       "id": "task_performance_time",
       "name": "Task Performance & Time",
       "description": "Purple agent task performance considering time used and success rate (as per YouTube tutorial)",
-      "query": "SELECT purple_agent_name, task_id, difficulty_level, task_passed, evaluation_time_seconds, CASE WHEN task_passed = true THEN 'PASS' ELSE 'FAIL' END as status, ROUND(CAST(evaluation_time_seconds AS FLOAT) / 300 * 100, 1) as time_used_pct, submission_timestamp FROM read_json_auto('results/*.json') WHERE submission_status = 'completed' ORDER BY purple_agent_name, evaluation_time_seconds DESC","
+      "query": "SELECT purple_agent_name, task_id, difficulty_level, task_passed, evaluation_time_seconds, CASE WHEN task_passed = true THEN 'PASS' ELSE 'FAIL' END as status, ROUND(CAST(evaluation_time_seconds AS FLOAT) / 300 * 100, 1) as time_used_pct, submission_timestamp FROM read_json_auto('results/*.json') WHERE submission_status = 'completed' ORDER BY purple_agent_name, evaluation_time_seconds DESC",
       "columns": [
         { "name": "purple_agent_name", "type": "string", "label": "Agent" },
         { "name": "task_id", "type": "string", "label": "Task ID" },
@@ -74,7 +74,6 @@
       "columns": [
         { "name": "task_id", "type": "string", "label": "Task" },
         { "name": "difficulty_level", "type": "string", "label": "Level" },
-        { "name": "difficulty_weight", "type": "integer", "label": "Weight" },
         { "name": "agents_passed_count", "type": "integer", "label": "Agents Passed" },
         { "name": "total_attempts", "type": "integer", "label": "Total Attempts" },
         { "name": "pass_rate_pct", "type": "float", "label": "Pass Rate (%)" },
