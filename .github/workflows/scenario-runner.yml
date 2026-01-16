@@ -127,7 +127,7 @@ jobs:
             -v $(pwd)/results:/home/agent/results \
             purple-agent:latest \
             --backend openrouter \
-            --model google/gemini-1.5-flash \
+            --model anthropic/claude-3-haiku \
             --green-url http://localhost:9009 \
             --levels level-0 level-1a \
             --max-iterations 1 \
