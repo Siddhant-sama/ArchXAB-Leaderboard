@@ -245,7 +245,7 @@ jobs:
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           
           # Generate assessment_results.parquet.json with proper leaderboard schema
-          python3 << 'PYTHON_EOF'
+          python3 << PYTHON_EOF
           import json
           import sys
           
