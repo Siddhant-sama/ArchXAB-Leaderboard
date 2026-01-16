@@ -3,17 +3,15 @@
       "id": "main_ranking",
       "name": "Main Leaderboard",
       "description": "Ranking of purple agents by weighted score and pass rate",
-      "query": "SELECT ROW_NUMBER() OVER (ORDER BY tasks_passed DESC) as rank, purple_agent_name, total_tasks_evaluated, tasks_passed, ROUND(CAST(tasks_passed AS FLOAT) / total_tasks_evaluated * 100, 2) as pass_rate_pct, 0.0 as weighted_score, best_submission_timestamp FROM (SELECT purple_agent_name, COUNT(DISTINCT task_id) as total_tasks_evaluated, COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) as tasks_passed, MAX(submission_timestamp) as best_submission_timestamp FROM read_json_auto('results/assessment_results.parquet.json') WHERE submission_status = 'completed' GROUP BY purple_agent_name) leaderboard_data",
+      "query": "SELECT purple_agent_id as id, purple_agent_name, COUNT(*) as total_tasks, COUNT(CASE WHEN task_passed = true THEN 1 END) as tasks_passed, ROUND(100.0 * COUNT(CASE WHEN task_passed = true THEN 1 END) / COUNT(*), 2) as pass_rate FROM read_json_auto('results/*.json') WHERE task_passed IS NOT NULL GROUP BY purple_agent_id, purple_agent_name ORDER BY pass_rate DESC",
       "columns": [
-        { "name": "rank", "type": "integer", "label": "Rank" },
+        { "name": "id", "type": "string", "label": "Agent ID" },
         { "name": "purple_agent_name", "type": "string", "label": "Agent Name" },
-        { "name": "total_tasks_evaluated", "type": "integer", "label": "Tasks Evaluated" },
+        { "name": "total_tasks", "type": "integer", "label": "Tasks Evaluated" },
         { "name": "tasks_passed", "type": "integer", "label": "Tasks Passed" },
-        { "name": "pass_rate_pct", "type": "float", "label": "Pass Rate (%)" },
-        { "name": "weighted_score", "type": "float", "label": "Weighted Score" },
-        { "name": "best_submission_timestamp", "type": "timestamp", "label": "Best Score Date" }
+        { "name": "pass_rate", "type": "float", "label": "Pass Rate (%)" }
       ],
-      "sort_by": "weighted_score",
+      "sort_by": "pass_rate",
       "sort_order": "DESC",
       "display_type": "table"
     },
@@ -21,7 +19,7 @@
       "id": "task_performance_time",
       "name": "Task Performance & Time",
       "description": "Purple agent task performance considering time used and success rate (as per YouTube tutorial)",
-      "query": "SELECT purple_agent_name, task_id, difficulty_level, task_passed, evaluation_time_seconds, CASE WHEN task_passed = true THEN 'PASS' ELSE 'FAIL' END as status, ROUND(CAST(evaluation_time_seconds AS FLOAT) / 300 * 100, 1) as time_used_pct, submission_timestamp FROM read_json_auto('results/assessment_results.parquet.json') WHERE submission_status = 'completed' ORDER BY purple_agent_name, evaluation_time_seconds DESC",
+      "query": "SELECT purple_agent_name, task_id, difficulty_level, task_passed, evaluation_time_seconds, CASE WHEN task_passed = true THEN 'PASS' ELSE 'FAIL' END as status, ROUND(CAST(evaluation_time_seconds AS FLOAT) / 300 * 100, 1) as time_used_pct, submission_timestamp FROM read_json_auto('results/*.json') WHERE submission_status = 'completed' ORDER BY purple_agent_name, evaluation_time_seconds DESC","
       "columns": [
         { "name": "purple_agent_name", "type": "string", "label": "Agent" },
         { "name": "task_id", "type": "string", "label": "Task ID" },
@@ -39,7 +37,7 @@
       "id": "per_level_performance",
       "name": "Performance by Difficulty Level",
       "description": "How each purple agent performs on each difficulty level",
-      "query": "SELECT purple_agent_name, difficulty_level, COUNT(DISTINCT task_id) as tasks_in_level, COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) as tasks_passed_in_level, ROUND(CASE WHEN COUNT(DISTINCT task_id) > 0 THEN CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) AS FLOAT) / COUNT(DISTINCT task_id) * 100 ELSE 0 END, 2) as pass_rate_pct, ROUND(AVG(evaluation_time_seconds), 1) as avg_eval_time_sec FROM read_json_auto('results/assessment_results.parquet.json') WHERE submission_status = 'completed' GROUP BY purple_agent_name, difficulty_level ORDER BY purple_agent_name, difficulty_level",
+      "query": "SELECT purple_agent_name, difficulty_level, COUNT(DISTINCT task_id) as tasks_in_level, COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) as tasks_passed_in_level, ROUND(CASE WHEN COUNT(DISTINCT task_id) > 0 THEN CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) AS FLOAT) / COUNT(DISTINCT task_id) * 100 ELSE 0 END, 2) as pass_rate_pct, ROUND(AVG(evaluation_time_seconds), 1) as avg_eval_time_sec FROM read_json_auto('results/*.json') WHERE submission_status = 'completed' GROUP BY purple_agent_name, difficulty_level ORDER BY purple_agent_name, difficulty_level",
       "columns": [
         { "name": "purple_agent_name", "type": "string", "label": "Agent" },
         { "name": "difficulty_level", "type": "string", "label": "Level" },
@@ -56,14 +54,13 @@
       "id": "submission_history",
       "name": "Submission History & Score Progression",
       "description": "Timeline of all submissions showing progressive improvement",
-      "query": "SELECT submission_timestamp, purple_agent_name, tasks_passed, total_tasks_evaluated, ROUND(CASE WHEN total_tasks_evaluated > 0 THEN CAST(tasks_passed AS FLOAT) / total_tasks_evaluated * 100 ELSE 0 END, 2) as pass_rate_pct, ROUND(weighted_score, 2) as weighted_score FROM (SELECT MAX(submission_timestamp) as submission_timestamp, purple_agent_name, COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) as tasks_passed, COUNT(DISTINCT task_id) as total_tasks_evaluated, CASE WHEN SUM(difficulty_weight) > 0 THEN SUM(CASE WHEN task_passed = true THEN difficulty_weight ELSE 0 END) / SUM(difficulty_weight) ELSE 0 END as weighted_score FROM read_json_auto('results/assessment_results.parquet.json') GROUP BY purple_agent_name) submission_summary ORDER BY submission_timestamp DESC",
+      "query": "SELECT submission_timestamp, purple_agent_name, tasks_passed, total_tasks_evaluated, ROUND(CASE WHEN total_tasks_evaluated > 0 THEN CAST(tasks_passed AS FLOAT) / total_tasks_evaluated * 100 ELSE 0 END, 2) as pass_rate_pct FROM (SELECT MAX(submission_timestamp) as submission_timestamp, purple_agent_name, COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) as tasks_passed, COUNT(DISTINCT task_id) as total_tasks_evaluated FROM read_json_auto('results/*.json') GROUP BY purple_agent_name) submission_summary ORDER BY submission_timestamp DESC",
       "columns": [
         { "name": "submission_timestamp", "type": "timestamp", "label": "Submitted" },
         { "name": "purple_agent_name", "type": "string", "label": "Agent" },
         { "name": "tasks_passed", "type": "integer", "label": "Passed" },
         { "name": "total_tasks_evaluated", "type": "integer", "label": "Total" },
-        { "name": "pass_rate_pct", "type": "float", "label": "Pass Rate (%)" },
-        { "name": "weighted_score", "type": "float", "label": "Score" }
+        { "name": "pass_rate_pct", "type": "float", "label": "Pass Rate (%)" }
       ],
       "sort_by": "submission_timestamp",
       "sort_order": "DESC",
@@ -73,7 +70,7 @@
       "id": "task_difficulty_analysis",
       "name": "Task Difficulty Analysis",
       "description": "Which tasks are hardest/easiest and which agents solve them",
-      "query": "SELECT task_id, difficulty_level, difficulty_weight, COUNT(DISTINCT CASE WHEN task_passed = true THEN purple_agent_name END) as agents_passed_count, COUNT(DISTINCT purple_agent_name) as total_attempts, ROUND(CASE WHEN COUNT(DISTINCT purple_agent_name) > 0 THEN CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN purple_agent_name END) AS FLOAT) / COUNT(DISTINCT purple_agent_name) * 100 ELSE 0 END, 2) as pass_rate_pct, ROUND(AVG(evaluation_time_seconds), 2) as avg_eval_time_sec FROM read_json_auto('results/assessment_results.parquet.json') WHERE submission_status = 'completed' GROUP BY task_id, difficulty_level, difficulty_weight ORDER BY pass_rate_pct ASC, difficulty_weight DESC",
+      "query": "SELECT task_id, difficulty_level, COUNT(DISTINCT CASE WHEN task_passed = true THEN purple_agent_name END) as agents_passed_count, COUNT(DISTINCT purple_agent_name) as total_attempts, ROUND(CASE WHEN COUNT(DISTINCT purple_agent_name) > 0 THEN CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN purple_agent_name END) AS FLOAT) / COUNT(DISTINCT purple_agent_name) * 100 ELSE 0 END, 2) as pass_rate_pct, ROUND(AVG(evaluation_time_seconds), 2) as avg_eval_time_sec FROM read_json_auto('results/*.json') WHERE submission_status = 'completed' GROUP BY task_id, difficulty_level ORDER BY pass_rate_pct ASC, task_id DESC",
       "columns": [
         { "name": "task_id", "type": "string", "label": "Task" },
         { "name": "difficulty_level", "type": "string", "label": "Level" },
@@ -91,7 +88,7 @@
       "id": "best_performers_by_level",
       "name": "Best Performers by Level",
       "description": "Top agent for each difficulty level",
-      "query": "SELECT difficulty_level, purple_agent_name, level_pass_rate FROM (SELECT difficulty_level, purple_agent_name, ROUND(CASE WHEN COUNT(DISTINCT task_id) > 0 THEN CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) AS FLOAT) / COUNT(DISTINCT task_id) * 100 ELSE 0 END, 2) as level_pass_rate, ROW_NUMBER() OVER (PARTITION BY difficulty_level ORDER BY COUNT(CASE WHEN task_passed = true THEN task_id END) DESC) as level_rank FROM read_json_auto('results/assessment_results.parquet.json') WHERE submission_status = 'completed' GROUP BY difficulty_level, purple_agent_name) ranked WHERE level_rank = 1 ORDER BY difficulty_level",
+      "query": "SELECT difficulty_level, purple_agent_name, level_pass_rate FROM (SELECT difficulty_level, purple_agent_name, ROUND(CASE WHEN COUNT(DISTINCT task_id) > 0 THEN CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) AS FLOAT) / COUNT(DISTINCT task_id) * 100 ELSE 0 END, 2) as level_pass_rate, ROW_NUMBER() OVER (PARTITION BY difficulty_level ORDER BY COUNT(CASE WHEN task_passed = true THEN task_id END) DESC) as level_rank FROM read_json_auto('results/*.json') WHERE submission_status = 'completed' GROUP BY difficulty_level, purple_agent_name) ranked WHERE level_rank = 1 ORDER BY difficulty_level",
       "columns": [
         { "name": "difficulty_level", "type": "string", "label": "Level" },
         { "name": "purple_agent_name", "type": "string", "label": "Top Agent" },
@@ -105,14 +102,13 @@
       "id": "recent_activity",
       "name": "Recent Submissions",
       "description": "Last 20 submissions across all agents",
-      "query": "SELECT submission_timestamp, purple_agent_name, tasks_passed, total_tasks, ROUND(CASE WHEN total_tasks > 0 THEN CAST(tasks_passed AS FLOAT) / total_tasks * 100 ELSE 0 END, 2) as pass_rate_pct, ROUND(weighted_score, 2) as score, submission_status FROM (SELECT submission_timestamp, purple_agent_name, SUM(CASE WHEN task_passed = true THEN 1 ELSE 0 END) as tasks_passed, COUNT(*) as total_tasks, CASE WHEN SUM(difficulty_weight) > 0 THEN SUM(CASE WHEN task_passed = true THEN difficulty_weight ELSE 0 END) / SUM(difficulty_weight) ELSE 0 END as weighted_score, submission_status, ROW_NUMBER() OVER (PARTITION BY purple_agent_name, submission_timestamp ORDER BY submission_timestamp DESC) as rn FROM read_json_auto('results/assessment_results.parquet.json') GROUP BY submission_timestamp, purple_agent_name, submission_status) recent WHERE rn = 1 ORDER BY submission_timestamp DESC LIMIT 20",
+      "query": "SELECT submission_timestamp, purple_agent_name, tasks_passed, total_tasks, ROUND(CASE WHEN total_tasks > 0 THEN CAST(tasks_passed AS FLOAT) / total_tasks * 100 ELSE 0 END, 2) as pass_rate_pct, submission_status FROM (SELECT submission_timestamp, purple_agent_name, SUM(CASE WHEN task_passed = true THEN 1 ELSE 0 END) as tasks_passed, COUNT(*) as total_tasks, submission_status, ROW_NUMBER() OVER (PARTITION BY purple_agent_name, submission_timestamp ORDER BY submission_timestamp DESC) as rn FROM read_json_auto('results/*.json') GROUP BY submission_timestamp, purple_agent_name, submission_status) recent WHERE rn = 1 ORDER BY submission_timestamp DESC LIMIT 20",
       "columns": [
         { "name": "submission_timestamp", "type": "timestamp", "label": "Submitted" },
         { "name": "purple_agent_name", "type": "string", "label": "Agent" },
         { "name": "tasks_passed", "type": "integer", "label": "Passed" },
         { "name": "total_tasks", "type": "integer", "label": "Total" },
         { "name": "pass_rate_pct", "type": "float", "label": "Pass Rate (%)" },
-        { "name": "score", "type": "float", "label": "Score" },
         { "name": "submission_status", "type": "string", "label": "Status" }
       ],
       "sort_by": "submission_timestamp",
@@ -123,7 +119,7 @@
       "id": "speed_vs_accuracy",
       "name": "Speed vs Accuracy Trade-off",
       "description": "Time efficiency vs pass rate - agents optimizing for speed vs correctness",
-      "query": "SELECT purple_agent_name, COUNT(DISTINCT task_id) as tasks_evaluated, COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) as tasks_passed, ROUND(CASE WHEN COUNT(DISTINCT task_id) > 0 THEN CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) AS FLOAT) / COUNT(DISTINCT task_id) * 100 ELSE 0 END, 2) as pass_rate_pct, ROUND(AVG(evaluation_time_seconds), 1) as avg_time_sec, ROUND(MIN(evaluation_time_seconds), 1) as min_time_sec, ROUND(MAX(evaluation_time_seconds), 1) as max_time_sec FROM read_json_auto('results/assessment_results.parquet.json') WHERE submission_status = 'completed' GROUP BY purple_agent_name ORDER BY pass_rate_pct DESC",
+      "query": "SELECT purple_agent_name, COUNT(DISTINCT task_id) as tasks_evaluated, COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) as tasks_passed, ROUND(CASE WHEN COUNT(DISTINCT task_id) > 0 THEN CAST(COUNT(DISTINCT CASE WHEN task_passed = true THEN task_id END) AS FLOAT) / COUNT(DISTINCT task_id) * 100 ELSE 0 END, 2) as pass_rate_pct, ROUND(AVG(evaluation_time_seconds), 1) as avg_time_sec, ROUND(MIN(evaluation_time_seconds), 1) as min_time_sec, ROUND(MAX(evaluation_time_seconds), 1) as max_time_sec FROM read_json_auto('results/*.json') WHERE submission_status = 'completed' GROUP BY purple_agent_name ORDER BY pass_rate_pct DESC",
       "columns": [
         { "name": "purple_agent_name", "type": "string", "label": "Agent" },
         { "name": "tasks_evaluated", "type": "integer", "label": "Tasks" },
