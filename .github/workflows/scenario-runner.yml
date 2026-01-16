@@ -28,20 +28,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       
-      - name: Checkout ArchXBench repository
+      - name: Checkout ArchXGreen repository
         uses: actions/checkout@v3
         with:
-          repository: CSG-AgenticAI/ArchXAgent
-          path: ArchXBench
+          repository: Siddhant-sama/ArchXGreen
+          path: ArchXGreen
       
       - name: Build green agent image
         run: |
-          cd ArchXBench
+          cd ArchXGreen
           docker build -t green-agent:latest -f Dockerfile .
       
       - name: Build purple agent image
         run: |
-          cd ArchXBench
+          cd ArchXGreen
           # Create a minimal Dockerfile for purple agent
           cat > Dockerfile.purple <<'EOF'
           FROM python:3.11-slim
