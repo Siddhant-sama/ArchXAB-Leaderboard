@@ -65,7 +65,7 @@ jobs:
               uv sync --locked
           
           # Entry point runs purple agent
-          ENTRYPOINT ["uv", "run", "python", "-m", "purple_agent.agent"]
+          ENTRYPOINT ["uv", "run", "src/purple_agent/agent.py"]
           CMD ["--backend", "openrouter", "--levels", "level-0", "--max-iterations", "3"]
           EOF
           
@@ -120,16 +120,15 @@ jobs:
             --name purple-agent \
             --network host \
             -e OPENROUTER_API_KEY="${OPENROUTER_API_KEY}" \
-            -v $(pwd)/results:/results \
+            -v $(pwd)/results:/home/agent/results \
             purple-agent:latest \
-            python3 -m purple_agent.agent \
-              --backend openrouter \
-              --model anthropic/claude-3.5-sonnet \
-              --green-url http://localhost:9009 \
-              --levels level-0 \
-              --max-iterations 3 \
-              --no-llm-validation \
-              --output /results/evaluation_results.json
+            --backend openrouter \
+            --model anthropic/claude-3.5-sonnet \
+            --green-url http://localhost:9009 \
+            --levels level-0 \
+            --max-iterations 3 \
+            --no-llm-validation \
+            --output /home/agent/results/evaluation_results.json
           
           echo "Purple agent evaluation complete"
           
