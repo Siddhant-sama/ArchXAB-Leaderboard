@@ -147,3 +147,4 @@ platform = "https://agentbeats.dev"
 webhook_url = "https://agentbeats.dev/api/hook/v2/019bc5b7-cc5c-7a62-a14f-4e813bdb25e1"
 webhook_secret = "GITHUB_SECRET"  # Store actual secret as GitHub repo secret
 # Trigger run 1
+# Trigger run 2
