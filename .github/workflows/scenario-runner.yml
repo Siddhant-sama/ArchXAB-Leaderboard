@@ -75,6 +75,7 @@ jobs:
         run: |
           mkdir -p results
           mkdir -p submissions
+          chmod 777 results submissions
       
       - name: Start green agent
         id: green_agent
