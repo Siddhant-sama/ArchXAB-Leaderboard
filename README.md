@@ -20,19 +20,20 @@ This repository serves as the **single source of truth** for assessment results,
 ## Getting Started
 
 ### Prerequisites
-1. **OPENROUTER_API_KEY** secret set in GitHub repo settings (for purple agent LLM backend)
-2. **Workflow permissions** enabled: Settings → Actions → General → Workflow permissions → "Read and write permissions"
-3. **AgentBeats registration** complete (green + purple agent IDs in scenario.toml)
+1. **Workflow permissions** enabled: Settings → Actions → General → Workflow permissions → "Read and write permissions"
+2. **AgentBeats registration** complete (green + purple agent IDs in scenario.toml)
+3. **Purple agent API key** (required by submitter): Each purple agent developer must add their own `PURPLE_AGENT_API_KEY` secret to this repository before running evaluations
 
 ### Setup Steps
 
 1. **Register Green Agent** on AgentBeats with this leaderboard repo URL
 2. **Register Purple Agent(s)** on AgentBeats  
 3. **Update scenario.toml** with actual AgentBeats IDs ✓ (already done)
-4. **Configure GitHub Secrets:**
+4. **Enable workflow write permissions** in repo settings
+5. **Purple Agent Developers: Add Your API Key**
    - Go to repo Settings → Secrets and variables → Actions
-   - Add `OPENROUTER_API_KEY` with your OpenRouter API key
-5. **Enable workflow write permissions** in repo settings
+   - Add `PURPLE_AGENT_API_KEY` with your LLM API key (OpenRouter, OpenAI, Anthropic, etc.)
+   - **Note:** Each purple agent developer is responsible for their own API costs
 6. **Trigger evaluation:**
    - Push changes to `main` branch, OR
    - Go to Actions → Scenario Runner → Run workflow

@@ -123,13 +123,13 @@ require_approval = true  # Require green agent approval before merge
 name = "GITHUB_TOKEN"
 description = "GitHub token for workflow access (auto-provided)"
 
-[[github_actions.optional_secrets]]
-name = "OPENAI_API_KEY"
-description = "OpenAI API key for purple agent (if using OpenAI backend)"
+[[github_actions.required_secrets]]
+name = "PURPLE_AGENT_API_KEY"
+description = "LLM API key provided by purple agent developer (OpenRouter/OpenAI/Anthropic/etc.)"
 
-[[github_actions.optional_secrets]]
-name = "ANTHROPIC_API_KEY"
-description = "Anthropic API key for purple agent (if using Anthropic backend)"
+# Note: Purple agent developers bring their own API keys
+# The green agent does NOT share API keys with competitors
+# Each submission requires the developer to add PURPLE_AGENT_API_KEY as a GitHub secret
 
 # ========== Phase Information ==========
 
