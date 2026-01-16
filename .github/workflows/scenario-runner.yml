@@ -340,19 +340,7 @@ jobs:
           if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
             gh pr create \
               --title "Assessment Results: Run ${{ github.run_id }}" \
-              --body "## Assessment Results
-
-**Run ID:** ${{ github.run_id }}
-**Triggered by:** ${{ github.actor }}
-**Commit:** ${{ github.sha }}
-
-### Results Summary
-- Tasks evaluated: ${{ steps.evaluation.outputs.tasks_total }}
-- Tasks passed: ${{ steps.evaluation.outputs.tasks_passed }}
-- Pass rate: ${{ steps.evaluation.outputs.pass_rate }}%
-
----
-*Merge this PR to publish results to the AgentBeats leaderboard.*" \
+              --body "Assessment results from workflow run ${{ github.run_id }}. Tasks: ${{ steps.evaluation.outputs.tasks_total }}, Passed: ${{ steps.evaluation.outputs.tasks_passed }}, Pass rate: ${{ steps.evaluation.outputs.pass_rate }}%. Merge to publish to leaderboard." \
               --base main \
               --head "$BRANCH" || echo "PR may already exist"
           else
