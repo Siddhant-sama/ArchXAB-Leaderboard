@@ -3,7 +3,7 @@
     "id": "main_ranking",
     "name": "Main Leaderboard",
     "description": "Purple agent performance ranking",
-    "query": "SELECT DISTINCT purple_agent_id as id, purple_agent_name FROM read_json_auto('results/*.json') LIMIT 10",
+    "query": "SELECT DISTINCT purple_agent_id as id, purple_agent_name FROM read_json_auto('assessment_results.parquet.json')",
     "columns": [
       { "name": "id", "type": "string", "label": "Agent ID" },
       { "name": "purple_agent_name", "type": "string", "label": "Agent" }
