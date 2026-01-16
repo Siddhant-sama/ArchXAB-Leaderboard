@@ -321,13 +321,11 @@ jobs:
             exit 0
           fi
           
-          # Create and push branch
-          BRANCH="results/run-${{ github.run_id }}"
-          git checkout -b $BRANCH
+          # Commit directly to main
           git commit -m "ci: Add assessment results from workflow run ${{ github.run_id }}"
-          git push origin $BRANCH
+          git push origin main
           
-          echo "branch_name=$BRANCH" >> $GITHUB_OUTPUT
+          echo "Committed results directly to main"
       
       - name: Clean up containers
         if: always()
