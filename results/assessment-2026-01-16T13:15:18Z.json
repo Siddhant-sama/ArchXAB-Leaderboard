@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-01-16T10:50:21Z",
-  "run_id": "21064081994",
-  "commit_sha": "1b5fb7274e5d2b5fbef11211c80587f4c8e70af3",
+  "timestamp": "2026-01-16T13:15:18Z",
+  "run_id": "21067787613",
+  "commit_sha": "1eaadb01a2720d49b196f35f020910be25209091",
   "actor": "Siddhant-sama",
   "green_agent": {
     "id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
@@ -15,10 +15,10 @@
     "image": "ghcr.io/siddhant-sama/archxgreen/purple:latest"
   },
   "results": {
-    "tasks_evaluated": 6,
-    "tasks_passed": 0,
-    "pass_rate": 0.0,
-    "execution_time_sec": 55.6471221446991
+    "tasks_evaluated": 20,
+    "tasks_passed": 12,
+    "pass_rate": 0.6,
+    "execution_time_sec": 72.85007166862488
   },
   "webhook_posted": true,
   "status": "completed"

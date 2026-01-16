@@ -1,37 +1,77 @@
 {
-  "total_tasks": 6,
-  "passed": 0,
-  "failed": 6,
-  "pass_rate": 0.0,
-  "weighted_score": 0.0,
-  "execution_time_sec": 55.6471221446991,
+  "total_tasks": 20,
+  "passed": 12,
+  "failed": 8,
+  "pass_rate": 0.6,
+  "weighted_score": 0.6,
+  "execution_time_sec": 72.85007166862488,
   "results": [
     {
-      "task_id": "level-1a/aes_sbox",
+      "task_id": "level-0/binary-encoder",
       "success": false,
       "iterations": 1,
-      "passed": 2,
-      "failed": 255,
-      "total": 257
+      "passed": 0,
+      "failed": 0,
+      "total": 0
     },
     {
-      "task_id": "level-1a/barrel_shifter",
+      "task_id": "level-0/bitmanip-unit",
       "success": false,
       "iterations": 1,
-      "passed": 50,
-      "failed": 1,
+      "passed": 0,
+      "failed": 51,
       "total": 51
     },
     {
-      "task_id": "level-1a/cla_8bit",
+      "task_id": "level-0/clock-divide-by-2",
+      "success": true,
+      "iterations": 1,
+      "passed": 21,
+      "failed": 0,
+      "total": 21
+    },
+    {
+      "task_id": "level-0/comparator-4bit",
+      "success": true,
+      "iterations": 1,
+      "passed": 5,
+      "failed": 0,
+      "total": 5
+    },
+    {
+      "task_id": "level-0/comparator-8bit",
       "success": false,
       "iterations": 1,
-      "passed": 2,
+      "passed": 0,
       "failed": 4,
+      "total": 4
+    },
+    {
+      "task_id": "level-0/decoder-2to4",
+      "success": true,
+      "iterations": 1,
+      "passed": 6,
+      "failed": 0,
       "total": 6
     },
     {
-      "task_id": "level-1a/gf2_8_multiplier",
+      "task_id": "level-0/decoder-3to8",
+      "success": true,
+      "iterations": 1,
+      "passed": 10,
+      "failed": 0,
+      "total": 10
+    },
+    {
+      "task_id": "level-0/demux-1to2",
+      "success": true,
+      "iterations": 1,
+      "passed": 5,
+      "failed": 0,
+      "total": 5
+    },
+    {
+      "task_id": "level-0/demux-1to4",
       "success": false,
       "iterations": 1,
       "passed": 0,
@@ -39,20 +79,92 @@
       "total": 0
     },
     {
-      "task_id": "level-1a/lfsr_stream_cipher",
-      "success": false,
+      "task_id": "level-0/down-counter",
+      "success": true,
       "iterations": 1,
-      "passed": 0,
+      "passed": 5,
       "failed": 0,
-      "total": 0
+      "total": 5
     },
     {
-      "task_id": "level-1a/rca_32bit",
+      "task_id": "level-0/gray-counter",
+      "success": true,
+      "iterations": 1,
+      "passed": 33,
+      "failed": 0,
+      "total": 33
+    },
+    {
+      "task_id": "level-0/johnson-counter",
       "success": false,
       "iterations": 1,
       "passed": 0,
+      "failed": 16,
+      "total": 16
+    },
+    {
+      "task_id": "level-0/mux2to1",
+      "success": true,
+      "iterations": 1,
+      "passed": 9,
       "failed": 0,
-      "total": 0
+      "total": 9
+    },
+    {
+      "task_id": "level-0/mux4to1",
+      "success": true,
+      "iterations": 1,
+      "passed": 65,
+      "failed": 0,
+      "total": 65
+    },
+    {
+      "task_id": "level-0/piso-regs",
+      "success": false,
+      "iterations": 1,
+      "passed": 3,
+      "failed": 5,
+      "total": 8
+    },
+    {
+      "task_id": "level-0/priority-encoder",
+      "success": false,
+      "iterations": 1,
+      "passed": 6,
+      "failed": 1,
+      "total": 7
+    },
+    {
+      "task_id": "level-0/ring-counter",
+      "success": true,
+      "iterations": 1,
+      "passed": 9,
+      "failed": 0,
+      "total": 9
+    },
+    {
+      "task_id": "level-0/sipo-regs",
+      "success": true,
+      "iterations": 1,
+      "passed": 2,
+      "failed": 0,
+      "total": 2
+    },
+    {
+      "task_id": "level-0/siso-regs",
+      "success": false,
+      "iterations": 1,
+      "passed": 2,
+      "failed": 1,
+      "total": 3
+    },
+    {
+      "task_id": "level-0/up-counter",
+      "success": true,
+      "iterations": 1,
+      "passed": 23,
+      "failed": 0,
+      "total": 23
     }
   ]
 }
