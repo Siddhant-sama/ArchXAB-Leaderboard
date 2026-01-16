@@ -119,8 +119,8 @@ jobs:
           echo "Running purple agent against green agent..."
           
           # Create results directory with proper permissions
-          mkdir -p results
-          chmod 777 results
+          mkdir -p results submissions
+          chmod -R 777 results submissions
           
           # Check if purple agent requires API key
           # Purple agent developers must provide their own API keys as GitHub secrets
@@ -130,10 +130,12 @@ jobs:
           timeout 600 docker run --rm \
             --name purple-agent \
             --network host \
+            --user 0:0 \
             -e OPENROUTER_API_KEY="${{ secrets.PURPLE_AGENT_API_KEY }}" \
             -e OPENAI_API_KEY="${{ secrets.PURPLE_AGENT_API_KEY }}" \
             -e ANTHROPIC_API_KEY="${{ secrets.PURPLE_AGENT_API_KEY }}" \
             -v $(pwd)/results:/home/agent/results \
+            -v $(pwd)/submissions:/home/agent/submissions \
             purple-agent:latest \
             --backend openrouter \
             --model anthropic/claude-3-haiku \
