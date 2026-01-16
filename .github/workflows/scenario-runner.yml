@@ -136,7 +136,6 @@ jobs:
             --green-url http://localhost:9009 \
             --levels level-0 \
             --max-iterations 1 \
-            --timeout 300 \
             --no-llm-validation \
             --output /home/agent/results/evaluation_results.json || true
           
