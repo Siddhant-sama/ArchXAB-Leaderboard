@@ -3,14 +3,15 @@
     "id": "main_ranking",
     "name": "Main Leaderboard",
     "description": "Purple agent performance ranking",
-    "query": "SELECT purple_agent_id as id, purple_agent_name, COUNT(*) as total_tasks, SUM(CAST(task_passed AS INTEGER)) as tasks_passed FROM results GROUP BY purple_agent_id, purple_agent_name ORDER BY tasks_passed DESC",
+    "query": "SELECT purple_agent_id as id, purple_agent_name, COUNT(*) as total_tasks, SUM(CAST(task_passed AS INTEGER)) as tasks_passed, ROUND(100.0 * SUM(CAST(task_passed AS INTEGER)) / COUNT(*), 1) as pass_rate FROM results GROUP BY purple_agent_id, purple_agent_name ORDER BY pass_rate DESC",
     "columns": [
       { "name": "id", "type": "string", "label": "Agent ID" },
       { "name": "purple_agent_name", "type": "string", "label": "Agent" },
       { "name": "total_tasks", "type": "integer", "label": "Tasks" },
-      { "name": "tasks_passed", "type": "integer", "label": "Passed" }
+      { "name": "tasks_passed", "type": "integer", "label": "Passed" },
+      { "name": "pass_rate", "type": "float", "label": "Pass Rate (%)" }
     ],
-    "sort_by": "tasks_passed",
+    "sort_by": "pass_rate",
     "sort_order": "DESC",
     "display_type": "table"
   }
