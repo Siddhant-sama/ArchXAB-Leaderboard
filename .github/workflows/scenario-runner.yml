@@ -260,44 +260,4 @@ jobs:
           docker stop purple-agent || true
           docker rm green-agent || true
           docker rm purple-agent || true
-      
-      - name: Create pull request with results
-        if: github.ref == 'refs/heads/main' && steps.results.outcome == 'success'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          commit-message: "ci: Add assessment results from workflow run ${{ github.run_id }}"
-          title: "Assessment Results - Run ${{ github.run_id }}"
-          body: |
-            # Assessment Results
-            
-            Automated assessment results from GitHub Actions run.
-            
-            ## Run Details
-            - **Run ID:** ${{ github.run_id }}
-            - **Commit:** ${{ github.sha }}
-            - **Actor:** ${{ github.actor }}
-            - **Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-            
-            ## Results Summary
-            - **Tasks Evaluated:** ${{ steps.evaluation.outputs.tasks_total }}
-            - **Tasks Passed:** ${{ steps.evaluation.outputs.tasks_passed }}
-            - **Pass Rate:** ${{ steps.evaluation.outputs.pass_rate }}%
-            - **Execution Time:** ${{ steps.evaluation.outputs.exec_time }}s
-            
-            ## Agents
-            - **Green Agent:** 019bc5b7-cc56-7f23-95f7-e15e0095acb4 (ArchXGreen)
-            - **Purple Agent:** 019bc5b3-2114-7553-933a-2c6f5cbb0fa4 (Baseline)
-            
-            ## Files
-            - Results: `results/`
-            - Submissions: `submissions/`
-            - Evaluation Details: `results/evaluation_results.json`
-            
-            **Webhook Status:** ✓ Posted to AgentBeats
-            
-            ---
-            
-            Please review and merge to finalize submission on AgentBeats leaderboard.
-          branch: assessment-results-${{ github.run_id }}
-          delete-branch: true
 # Triggering rebuild with fixed Dockerfile
