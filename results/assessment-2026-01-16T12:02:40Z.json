@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-01-16T12:02:40Z",
+  "run_id": "21065902036",
+  "commit_sha": "2380f7abb6081079532393e5e6f49c69dc04bf5d",
+  "actor": "Siddhant-sama",
+  "green_agent": {
+    "id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
+    "name": "ArchXGreen Green Agent",
+    "image": "ghcr.io/siddhant-sama/archxgreen:latest",
+    "total_tasks": 71
+  },
+  "purple_agent": {
+    "id": "019bc5b3-2114-7553-933a-2c6f5cbb0fa4",
+    "name": "ArchXGreen Baseline Purple Agent",
+    "image": "ghcr.io/siddhant-sama/archxgreen/purple:latest"
+  },
+  "results": {
+    "tasks_evaluated": 6,
+    "tasks_passed": 0,
+    "pass_rate": 0.0,
+    "execution_time_sec": 55.6471221446991
+  },
+  "webhook_posted": true,
+  "status": "completed"
+}
