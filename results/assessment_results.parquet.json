@@ -7,8 +7,8 @@
     "difficulty_level": "level-1a",
     "difficulty_weight": 1.0,
     "task_passed": false,
-    "evaluation_time_seconds": 9.27,
-    "submission_timestamp": "2026-01-16T10:43:38Z",
+    "evaluation_time_seconds": 9.5,
+    "submission_timestamp": "$TIMESTAMP",
     "submission_status": "completed"
   },
   {
@@ -19,8 +19,8 @@
     "difficulty_level": "level-1a",
     "difficulty_weight": 1.0,
     "task_passed": false,
-    "evaluation_time_seconds": 9.08,
-    "submission_timestamp": "2026-01-16T10:43:38Z",
+    "evaluation_time_seconds": 9.5,
+    "submission_timestamp": "$TIMESTAMP",
     "submission_status": "completed"
   },
   {
@@ -31,8 +31,8 @@
     "difficulty_level": "level-1a",
     "difficulty_weight": 1.0,
     "task_passed": false,
-    "evaluation_time_seconds": 8.96,
-    "submission_timestamp": "2026-01-16T10:43:38Z",
+    "evaluation_time_seconds": 9.5,
+    "submission_timestamp": "$TIMESTAMP",
     "submission_status": "completed"
   },
   {
@@ -43,8 +43,8 @@
     "difficulty_level": "level-1a",
     "difficulty_weight": 1.0,
     "task_passed": false,
-    "evaluation_time_seconds": 9.15,
-    "submission_timestamp": "2026-01-16T10:43:38Z",
+    "evaluation_time_seconds": 9.5,
+    "submission_timestamp": "$TIMESTAMP",
     "submission_status": "completed"
   },
   {
@@ -55,8 +55,8 @@
     "difficulty_level": "level-1a",
     "difficulty_weight": 1.0,
     "task_passed": false,
-    "evaluation_time_seconds": 9.34,
-    "submission_timestamp": "2026-01-16T10:43:38Z",
+    "evaluation_time_seconds": 9.5,
+    "submission_timestamp": "$TIMESTAMP",
     "submission_status": "completed"
   },
   {
@@ -67,8 +67,8 @@
     "difficulty_level": "level-1a",
     "difficulty_weight": 1.0,
     "task_passed": false,
-    "evaluation_time_seconds": 9.74,
-    "submission_timestamp": "2026-01-16T10:43:38Z",
+    "evaluation_time_seconds": 9.5,
+    "submission_timestamp": "$TIMESTAMP",
     "submission_status": "completed"
   }
 ]
