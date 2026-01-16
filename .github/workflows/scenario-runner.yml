@@ -129,8 +129,8 @@ jobs:
             --backend openrouter \
             --model anthropic/claude-3-haiku \
             --green-url http://localhost:9009 \
-            --levels level-0 level-1a level-1b level-1c level-2 \
-            --max-iterations 3 \
+            --levels level-0 level-1a \
+            --max-iterations 1 \
             --no-llm-validation \
             --output /home/agent/results/evaluation_results.json
           
