@@ -114,6 +114,10 @@ jobs:
         run: |
           echo "Running purple agent against green agent..."
           
+          # Create results directory with proper permissions
+          mkdir -p results
+          chmod 777 results
+          
           # Check if purple agent requires API key
           # Purple agent developers must provide their own API keys as GitHub secrets
           # named: PURPLE_AGENT_API_KEY (or specific keys like OPENROUTER_API_KEY)
