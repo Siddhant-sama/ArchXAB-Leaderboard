@@ -62,7 +62,7 @@ jobs:
           
           RUN \
               --mount=type=cache,target=/home/agent/.cache/uv,uid=1000 \
-              uv sync --locked
+              uv sync --locked --extra llm
           
           # Entry point runs purple agent
           ENTRYPOINT ["uv", "run", "src/purple_agent/agent.py"]
