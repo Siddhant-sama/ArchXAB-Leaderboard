@@ -336,16 +336,14 @@ jobs:
         run: |
           BRANCH="results/run-${{ github.run_id }}"
           
-          # Check if branch exists on remote
-          if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
-            gh pr create \
-              --title "Assessment Results: Run ${{ github.run_id }}" \
-              --body "Assessment results from workflow run ${{ github.run_id }}. Tasks: ${{ steps.evaluation.outputs.tasks_total }}, Passed: ${{ steps.evaluation.outputs.tasks_passed }}, Pass rate: ${{ steps.evaluation.outputs.pass_rate }}%. Merge to publish to leaderboard." \
-              --base main \
-              --head "$BRANCH" || echo "PR may already exist"
-          else
-            echo "Branch not found, skipping PR creation"
-          fi
+          echo "Attempting to create PR for branch: $BRANCH"
+          
+          # Try to create PR
+          gh pr create \
+            --title "Assessment Results: Run ${{ github.run_id }}" \
+            --body "Assessment results from workflow run ${{ github.run_id }}. Merge to publish to leaderboard." \
+            --base main \
+            --head "$BRANCH" 2>&1 || echo "PR creation failed or already exists"
       
       - name: Clean up containers
         if: always()
