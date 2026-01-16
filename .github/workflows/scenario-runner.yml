@@ -255,6 +255,29 @@ jobs:
           
           echo "Submission record created: $SUBMISSION_FILE"
       
+      - name: Commit and push results
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Add results files
+          git add -A results/ submissions/ 2>/dev/null || true
+          
+          # Check if there are changes
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          # Create and push branch
+          BRANCH="results/run-${{ github.run_id }}"
+          git checkout -b $BRANCH
+          git commit -m "ci: Add assessment results from workflow run ${{ github.run_id }}"
+          git push origin $BRANCH
+          
+          echo "branch_name=$BRANCH" >> $GITHUB_OUTPUT
+      
       - name: Clean up containers
         if: always()
         run: |
