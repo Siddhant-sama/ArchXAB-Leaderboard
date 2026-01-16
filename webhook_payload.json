@@ -1,0 +1,14 @@
+{
+  "green_agent_id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
+  "purple_agent_id": "019bc5b3-2114-7553-933a-2c6f5cbb0fa4",
+  "submission_id": "21063401245",
+  "submission_timestamp": "2026-01-16T10:23:54Z",
+  "github_commit_sha": "7bee02ebed4020bc0a7194249dc4fee1e96d44b8",
+  "github_actor": "Siddhant-sama",
+  "tasks_evaluated": ,
+  "tasks_passed": ,
+  "pass_rate": ,
+  "execution_time_sec": ,
+  "results_file": "results/evaluation_results.json",
+  "status": "completed"
+}
