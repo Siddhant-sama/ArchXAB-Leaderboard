@@ -42,25 +42,31 @@ jobs:
       - name: Build purple agent image
         run: |
           cd ArchXGreen
-          # Create a minimal Dockerfile for purple agent
+          # Create Dockerfile for purple agent using same base
           cat > Dockerfile.purple <<'EOF'
-          FROM python:3.11-slim
+          FROM ghcr.io/astral-sh/uv:python3.13-bookworm
           
-          WORKDIR /app
-          
-          # Install dependencies
-          RUN apt-get update && apt-get install -y --no-install-recommends \
-              curl \
-              jq \
+          RUN apt-get update \
+              && apt-get install -y --no-install-recommends \
+                  git \
+                  curl \
+                  jq \
               && rm -rf /var/lib/apt/lists/*
           
-          COPY requirements.txt .
-          RUN pip install --no-cache-dir -r requirements.txt
+          RUN adduser agent
+          USER agent
+          WORKDIR /home/agent
           
-          COPY . .
+          COPY pyproject.toml uv.lock README.md ./
+          COPY src src
           
-          # Default command runs purple agent
-          CMD ["python3", "-m", "purple_agent.agent", "--backend", "openrouter"]
+          RUN \
+              --mount=type=cache,target=/home/agent/.cache/uv,uid=1000 \
+              uv sync --locked
+          
+          # Entry point runs purple agent
+          ENTRYPOINT ["uv", "run", "python", "-m", "purple_agent.agent"]
+          CMD ["--backend", "openrouter", "--levels", "level-0", "--max-iterations", "3"]
           EOF
           
           docker build -t purple-agent:latest -f Dockerfile.purple .
