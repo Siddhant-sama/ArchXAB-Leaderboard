@@ -172,6 +172,8 @@ jobs:
             "submission_timestamp": "$TIMESTAMP",
             "github_commit_sha": "${{ github.sha }}",
             "github_actor": "${{ github.actor }}",
+            "github_repository": "${{ github.repository }}",
+            "github_server_url": "${{ github.server_url }}",
             "tasks_evaluated": $(jq -r '.total_tasks' results/evaluation_results.json),
             "tasks_passed": $(jq -r '.passed' results/evaluation_results.json),
             "pass_rate": $(jq -r '.pass_rate' results/evaluation_results.json),
