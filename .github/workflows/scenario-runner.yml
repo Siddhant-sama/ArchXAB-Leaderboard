@@ -130,7 +130,7 @@ jobs:
             --backend openrouter \
             --model anthropic/claude-3-haiku \
             --green-url http://localhost:9009 \
-            --levels level-1a \
+            --levels level-0 \
             --max-iterations 1 \
             --no-llm-validation \
             --output /home/agent/results/evaluation_results.json || true

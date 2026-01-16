@@ -1,0 +1,74 @@
+[
+  {
+    "purple_agent_id": "019bc5b3-2114-7553-933a-2c6f5cbb0fa4",
+    "purple_agent_name": "ArchXGreen Baseline Purple Agent",
+    "green_agent_id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
+    "task_id": "level-0/binary-encoder",
+    "difficulty_level": "level-0",
+    "difficulty_weight": 1.0,
+    "task_passed": true,
+    "evaluation_time_seconds": 12.8,
+    "submission_timestamp": "2026-01-16T16:17:00Z",
+    "submission_status": "completed"
+  },
+  {
+    "purple_agent_id": "019bc5b3-2114-7553-933a-2c6f5cbb0fa4",
+    "purple_agent_name": "ArchXGreen Baseline Purple Agent",
+    "green_agent_id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
+    "task_id": "level-0/bitmanip-unit",
+    "difficulty_level": "level-0",
+    "difficulty_weight": 1.0,
+    "task_passed": false,
+    "evaluation_time_seconds": 11.2,
+    "submission_timestamp": "2026-01-16T16:17:00Z",
+    "submission_status": "completed"
+  },
+  {
+    "purple_agent_id": "019bc5b3-2114-7553-933a-2c6f5cbb0fa4",
+    "purple_agent_name": "ArchXGreen Baseline Purple Agent",
+    "green_agent_id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
+    "task_id": "level-0/clock-divide-by-2",
+    "difficulty_level": "level-0",
+    "difficulty_weight": 1.0,
+    "task_passed": false,
+    "evaluation_time_seconds": 13.5,
+    "submission_timestamp": "2026-01-16T16:17:00Z",
+    "submission_status": "completed"
+  },
+  {
+    "purple_agent_id": "019bc5b3-2114-7553-933a-2c6f5cbb0fa4",
+    "purple_agent_name": "ArchXGreen Baseline Purple Agent",
+    "green_agent_id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
+    "task_id": "level-0/comparator-4bit",
+    "difficulty_level": "level-0",
+    "difficulty_weight": 1.0,
+    "task_passed": false,
+    "evaluation_time_seconds": 12.3,
+    "submission_timestamp": "2026-01-16T16:17:00Z",
+    "submission_status": "completed"
+  },
+  {
+    "purple_agent_id": "019bc5b3-2114-7553-933a-2c6f5cbb0fa4",
+    "purple_agent_name": "ArchXGreen Baseline Purple Agent",
+    "green_agent_id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
+    "task_id": "level-0/comparator-8bit",
+    "difficulty_level": "level-0",
+    "difficulty_weight": 1.0,
+    "task_passed": false,
+    "evaluation_time_seconds": 13.9,
+    "submission_timestamp": "2026-01-16T16:17:00Z",
+    "submission_status": "completed"
+  },
+  {
+    "purple_agent_id": "019bc5b3-2114-7553-933a-2c6f5cbb0fa4",
+    "purple_agent_name": "ArchXGreen Baseline Purple Agent",
+    "green_agent_id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
+    "task_id": "level-0/decoder-2to4",
+    "difficulty_level": "level-0",
+    "difficulty_weight": 1.0,
+    "task_passed": false,
+    "evaluation_time_seconds": 13.5,
+    "submission_timestamp": "2026-01-16T16:17:00Z",
+    "submission_status": "completed"
+  }
+]
