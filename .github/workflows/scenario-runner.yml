@@ -31,7 +31,7 @@ jobs:
       - name: Checkout ArchXBench repository
         uses: actions/checkout@v3
         with:
-          repository: Siddhant-sama/ArchXBench
+          repository: CSG-AgenticAI/ArchXAgent
           path: ArchXBench
       
       - name: Build green agent image
