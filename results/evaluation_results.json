@@ -4,7 +4,7 @@
   "failed": 9,
   "pass_rate": 0.55,
   "weighted_score": 0.55,
-  "execution_time_sec": 78.85889887809753,
+  "execution_time_sec": 80.60625720024109,
   "results": [
     {
       "task_id": "level-0/binary-encoder",
