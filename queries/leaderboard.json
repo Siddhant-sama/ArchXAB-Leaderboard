@@ -3,7 +3,7 @@
     "id": "main_ranking",
     "name": "ArchXGreen Leaderboard",
     "description": "Purple agent performance ranking by pass rate",
-    "query": "SELECT purple_agent_id as id, purple_agent_name, COUNT(*) as total_tasks, SUM(CAST(task_passed AS INTEGER)) as tasks_passed, ROUND(100.0 * SUM(CAST(task_passed AS INTEGER)) / COUNT(*), 1) as pass_rate FROM read_json_auto('results/assessment-*.json') WHERE task_id IS NOT NULL GROUP BY purple_agent_id, purple_agent_name ORDER BY pass_rate DESC",
+    "query": "SELECT purple_agent_id as id, purple_agent_name, COUNT(*) as total_tasks, SUM(CAST(task_passed AS INTEGER)) as tasks_passed, ROUND(100.0 * SUM(CAST(task_passed AS INTEGER)) / COUNT(*), 1) as pass_rate FROM results GROUP BY purple_agent_id, purple_agent_name ORDER BY pass_rate DESC",
     "columns": [
       { "name": "id", "type": "string", "label": "Agent ID" },
       { "name": "purple_agent_name", "type": "string", "label": "Agent" },
