@@ -50,66 +50,142 @@ jobs:
           mkdir -p results
           mkdir -p submissions
       
-      - name: Run green agent (baseline)
-        id: baseline
-        continue-on-error: true
+      - name: Start green agent
+        id: green_agent
         run: |
-          echo "Running baseline purple agent against green agent..."
+          echo "Starting green agent on port 9009..."
           
-          # Start green agent in background
           docker run -d \
             --name green-agent \
             -p 9009:9009 \
+            -e HOST=0.0.0.0 \
+            -e PORT=9009 \
+            -e USE_DYNAMIC_LOADER=true \
             green-agent:latest
           
-          # Give it time to start
-          sleep 5
+          # Wait for startup
+          sleep 8
           
-          # Check health
-          curl -f http://localhost:9009/health || exit 1
+          # Health check with retries
+          for i in {1..10}; do
+            if curl -f http://localhost:9009/health > /dev/null 2>&1; then
+              echo "Green agent is healthy"
+              break
+            fi
+            echo "Waiting for green agent... attempt $i"
+            sleep 3
+          done
           
-          # Get task count
-          TASK_COUNT=$(curl -s http://localhost:9009/health | jq '.total_tasks')
+          # Verify and get task count
+          HEALTH=$(curl -s http://localhost:9009/health)
+          TASK_COUNT=$(echo "$HEALTH" | jq '.total_tasks')
           echo "Green agent ready with $TASK_COUNT tasks"
+          echo "task_count=$TASK_COUNT" >> $GITHUB_OUTPUT
+      
+      - name: Run purple agent evaluation
+        id: evaluation
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          echo "Running purple agent against green agent..."
           
-          # Start purple agent
-          docker run -d \
+          # Run purple agent with OpenRouter backend
+          docker run --rm \
             --name purple-agent \
             --network host \
-            -e OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
-            -e ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
-            purple-agent:latest
+            -e OPENROUTER_API_KEY="${OPENROUTER_API_KEY}" \
+            -v $(pwd)/results:/results \
+            purple-agent:latest \
+            python3 -m purple_agent.agent \
+              --backend openrouter \
+              --model anthropic/claude-3.5-sonnet \
+              --green-url http://localhost:9009 \
+              --levels level-0 \
+              --max-iterations 3 \
+              --no-llm-validation \
+              --output /results/evaluation_results.json
           
-          sleep 3
+          echo "Purple agent evaluation complete"
           
-          echo "Agents started successfully"
+          # Extract metrics from results
+          if [ -f results/evaluation_results.json ]; then
+            PASS_RATE=$(jq -r '.pass_rate' results/evaluation_results.json)
+            TASKS_PASSED=$(jq -r '.passed' results/evaluation_results.json)
+            TASKS_TOTAL=$(jq -r '.total_tasks' results/evaluation_results.json)
+            EXEC_TIME=$(jq -r '.execution_time_sec' results/evaluation_results.json)
+            
+            echo "pass_rate=$PASS_RATE" >> $GITHUB_OUTPUT
+            echo "tasks_passed=$TASKS_PASSED" >> $GITHUB_OUTPUT
+            echo "tasks_total=$TASKS_TOTAL" >> $GITHUB_OUTPUT
+            echo "exec_time=$EXEC_TIME" >> $GITHUB_OUTPUT
+            
+            echo "Results: $TASKS_PASSED/$TASKS_TOTAL passed (${PASS_RATE})"
+          fi
+      
+      - name: Post results to AgentBeats webhook
+        if: steps.evaluation.outcome == 'success'
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          # Build webhook payload
+          cat > webhook_payload.json <<EOF
+          {
+            "green_agent_id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
+            "purple_agent_id": "019bc5b3-2114-7553-933a-2c6f5cbb0fa4",
+            "submission_id": "${{ github.run_id }}",
+            "submission_timestamp": "$TIMESTAMP",
+            "github_commit_sha": "${{ github.sha }}",
+            "github_actor": "${{ github.actor }}",
+            "tasks_evaluated": ${{ steps.evaluation.outputs.tasks_total }},
+            "tasks_passed": ${{ steps.evaluation.outputs.tasks_passed }},
+            "pass_rate": ${{ steps.evaluation.outputs.pass_rate }},
+            "execution_time_sec": ${{ steps.evaluation.outputs.exec_time }},
+            "results_file": "results/evaluation_results.json",
+            "status": "completed"
+          }
+          EOF
+          
+          # Post to AgentBeats webhook
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d @webhook_payload.json \
+            https://agentbeats.dev/api/hook/v2/019bc5b7-cc5c-7a62-a14f-4e813bdb25e1
+          
+          echo "Results posted to AgentBeats"
       
       - name: Collect results
-        if: steps.baseline.outcome == 'success'
+        if: steps.evaluation.outcome == 'success'
         id: results
         run: |
-          # Generate result timestamp
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          RESULT_FILE="results/baseline-${TIMESTAMP}.json"
+          RESULT_FILE="results/assessment-${TIMESTAMP}.json"
           
-          # Simulate results collection (in production, query agents here)
+          # Create assessment summary
           cat > "$RESULT_FILE" <<EOF
           {
             "timestamp": "$TIMESTAMP",
+            "run_id": "${{ github.run_id }}",
+            "commit_sha": "${{ github.sha }}",
+            "actor": "${{ github.actor }}",
             "green_agent": {
+              "id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
               "name": "ArchXGreen Green Agent",
-              "status": "running"
+              "image": "ghcr.io/siddhant-sama/archxgreen:latest",
+              "total_tasks": ${{ steps.green_agent.outputs.task_count }}
             },
-            "purple_agents": [
-              {
-                "name": "ArchXGreen Baseline Purple Agent",
-                "status": "running"
-              }
-            ],
-            "tasks_evaluated": 0,
-            "tasks_passed": 0,
-            "status": "in_progress",
-            "note": "Full assessment would run here against all 71 tasks"
+            "purple_agent": {
+              "id": "019bc5b3-2114-7553-933a-2c6f5cbb0fa4",
+              "name": "ArchXGreen Baseline Purple Agent",
+              "image": "ghcr.io/siddhant-sama/archxgreen/purple:latest"
+            },
+            "results": {
+              "tasks_evaluated": ${{ steps.evaluation.outputs.tasks_total }},
+              "tasks_passed": ${{ steps.evaluation.outputs.tasks_passed }},
+              "pass_rate": ${{ steps.evaluation.outputs.pass_rate }},
+              "execution_time_sec": ${{ steps.evaluation.outputs.exec_time }}
+            },
+            "webhook_posted": true,
+            "status": "completed"
           }
           EOF
           
@@ -128,12 +204,18 @@ jobs:
             "git_branch": "${{ github.ref }}",
             "github_run_id": "${{ github.run_id }}",
             "github_actor": "${{ github.actor }}",
-            "green_agent": "ArchXGreen Green Agent",
-            "purple_agents": ["ArchXGreen Baseline Purple Agent"],
-            "result_file": "$(cat ${{ steps.results.outputs.result_file }} | jq -r '.timestamp')",
+            "green_agent_id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
+            "purple_agent_id": "019bc5b3-2114-7553-933a-2c6f5cbb0fa4",
+            "tasks_evaluated": ${{ steps.evaluation.outputs.tasks_total }},
+            "tasks_passed": ${{ steps.evaluation.outputs.tasks_passed }},
+            "pass_rate": ${{ steps.evaluation.outputs.pass_rate }},
+            "result_file": "${{ steps.results.outputs.result_file }}",
+            "webhook_posted": true,
             "status": "completed"
           }
           EOF
+          
+          echo "Submission record created: $SUBMISSION_FILE"
       
       - name: Clean up containers
         if: always()
@@ -148,20 +230,37 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: "ci: Add assessment results from workflow run ${{ github.run_id }}"
-          title: "Assessment Results - ${{ github.run_id }}"
+          title: "Assessment Results - Run ${{ github.run_id }}"
           body: |
             # Assessment Results
             
             Automated assessment results from GitHub Actions run.
             
+            ## Run Details
             - **Run ID:** ${{ github.run_id }}
             - **Commit:** ${{ github.sha }}
             - **Actor:** ${{ github.actor }}
+            - **Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
             
-            Results stored in:
-            - `results/`
-            - `submissions/`
+            ## Results Summary
+            - **Tasks Evaluated:** ${{ steps.evaluation.outputs.tasks_total }}
+            - **Tasks Passed:** ${{ steps.evaluation.outputs.tasks_passed }}
+            - **Pass Rate:** ${{ steps.evaluation.outputs.pass_rate }}%
+            - **Execution Time:** ${{ steps.evaluation.outputs.exec_time }}s
             
-            **Note:** Please review and approve results before merging to sync with AgentBeats leaderboard.
+            ## Agents
+            - **Green Agent:** 019bc5b7-cc56-7f23-95f7-e15e0095acb4 (ArchXGreen)
+            - **Purple Agent:** 019bc5b3-2114-7553-933a-2c6f5cbb0fa4 (Baseline)
+            
+            ## Files
+            - Results: `results/`
+            - Submissions: `submissions/`
+            - Evaluation Details: `results/evaluation_results.json`
+            
+            **Webhook Status:** ✓ Posted to AgentBeats
+            
+            ---
+            
+            Please review and merge to finalize submission on AgentBeats leaderboard.
           branch: assessment-results-${{ github.run_id }}
           delete-branch: true
