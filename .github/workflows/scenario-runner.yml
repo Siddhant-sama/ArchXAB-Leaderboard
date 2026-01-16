@@ -28,22 +28,42 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
+      - name: Checkout ArchXBench repository
+        uses: actions/checkout@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          repository: Siddhant-sama/ArchXBench
+          path: ArchXBench
       
-      - name: Pull green agent image
+      - name: Build green agent image
         run: |
-          docker pull ghcr.io/siddhant-sama/archxgreen:latest
-          docker tag ghcr.io/siddhant-sama/archxgreen:latest green-agent:latest
+          cd ArchXBench
+          docker build -t green-agent:latest -f Dockerfile .
       
-      - name: Pull purple agent image
+      - name: Build purple agent image
         run: |
-          docker pull ghcr.io/siddhant-sama/archxgreen/purple:latest
-          docker tag ghcr.io/siddhant-sama/archxgreen/purple:latest purple-agent:latest
+          cd ArchXBench
+          # Create a minimal Dockerfile for purple agent
+          cat > Dockerfile.purple <<'EOF'
+          FROM python:3.11-slim
+          
+          WORKDIR /app
+          
+          # Install dependencies
+          RUN apt-get update && apt-get install -y --no-install-recommends \
+              curl \
+              jq \
+              && rm -rf /var/lib/apt/lists/*
+          
+          COPY requirements.txt .
+          RUN pip install --no-cache-dir -r requirements.txt
+          
+          COPY . .
+          
+          # Default command runs purple agent
+          CMD ["python3", "-m", "purple_agent.agent", "--backend", "openrouter"]
+          EOF
+          
+          docker build -t purple-agent:latest -f Dockerfile.purple .
       
       - name: Create results directory
         run: |
