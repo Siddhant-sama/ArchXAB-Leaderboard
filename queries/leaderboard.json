@@ -3,13 +3,15 @@
     "id": "main_ranking",
     "name": "Main Leaderboard",
     "description": "Purple agent performance ranking",
-    "query": "SELECT DISTINCT purple_agent_id as id, purple_agent_name FROM read_json_auto('assessment_results.parquet.json')",
+    "query": "SELECT purple_agent_id as id, purple_agent_name, COUNT(*) as total_tasks, SUM(CAST(task_passed AS INTEGER)) as tasks_passed FROM results GROUP BY purple_agent_id, purple_agent_name ORDER BY tasks_passed DESC",
     "columns": [
       { "name": "id", "type": "string", "label": "Agent ID" },
-      { "name": "purple_agent_name", "type": "string", "label": "Agent" }
+      { "name": "purple_agent_name", "type": "string", "label": "Agent" },
+      { "name": "total_tasks", "type": "integer", "label": "Tasks" },
+      { "name": "tasks_passed", "type": "integer", "label": "Passed" }
     ],
-    "sort_by": "id",
-    "sort_order": "ASC",
+    "sort_by": "tasks_passed",
+    "sort_order": "DESC",
     "display_type": "table"
   }
 ]
