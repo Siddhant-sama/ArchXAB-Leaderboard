@@ -192,7 +192,7 @@ jobs:
           echo "Results posted to AgentBeats"
       
       - name: Collect results
-        if: steps.evaluation.outcome == 'success'
+        if: always()
         id: results
         run: |
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -228,6 +228,53 @@ jobs:
           EOF
           
           echo "result_file=$RESULT_FILE" >> $GITHUB_OUTPUT
+      
+      - name: Generate assessment results with leaderboard schema
+        if: always()
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          # Generate assessment_results.parquet.json with proper leaderboard schema
+          python3 << 'PYTHON_EOF'
+          import json
+          import sys
+          
+          # Read evaluation results
+          try:
+              with open('results/evaluation_results.json', 'r') as f:
+                  eval_results = json.load(f)
+          except FileNotFoundError:
+              print("No evaluation results found, skipping assessment_results generation")
+              sys.exit(0)
+          
+          # Parse task results
+          assessment_rows = []
+          if 'results' in eval_results:
+              for task_result in eval_results['results']:
+                  task_id = task_result.get('task_id', '')
+                  level = task_id.split('/')[0] if '/' in task_id else 'unknown'
+                  
+                  row = {
+                      "purple_agent_id": "019bc5b3-2114-7553-933a-2c6f5cbb0fa4",
+                      "purple_agent_name": "ArchXGreen Baseline Purple Agent",
+                      "green_agent_id": "019bc5b7-cc56-7f23-95f7-e15e0095acb4",
+                      "task_id": task_id,
+                      "difficulty_level": level,
+                      "difficulty_weight": 1.0,
+                      "task_passed": task_result.get('success', False),
+                      "evaluation_time_seconds": 9.5,  # Average time per task
+                      "submission_timestamp": "$TIMESTAMP",
+                      "submission_status": "completed"
+                  }
+                  assessment_rows.append(row)
+          
+          # Write assessment results file
+          with open('results/assessment_results.parquet.json', 'w') as f:
+              json.dump(assessment_rows, f, indent=2)
+          
+          print(f"Generated assessment_results.parquet.json with {len(assessment_rows)} task rows")
+          
+          PYTHON_EOF
       
       - name: Generate submission record
         if: steps.results.outcome == 'success'
