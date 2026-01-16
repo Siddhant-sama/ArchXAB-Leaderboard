@@ -8,16 +8,16 @@ on:
       - 'scenario.toml'
       - '.github/workflows/scenario-runner.yml'
   workflow_dispatch:
-
-permissions:
-  contents: write
-  pull-requests: write
-  workflows: write
     inputs:
       purple_agent:
         description: 'Which purple agent to run (or "all")'
         required: false
         default: 'all'
+
+permissions:
+  contents: write
+  pull-requests: write
+  workflows: write
 
 jobs:
   run-scenario:
