@@ -3,15 +3,13 @@
     "id": "main_ranking",
     "name": "Main Leaderboard",
     "description": "Purple agent performance ranking",
-    "query": "SELECT purple_agent_id as id, purple_agent_name, COUNT(*) as total_tasks, SUM(CAST(task_passed AS INTEGER)) as tasks_passed FROM read_json_auto('results/*.json') GROUP BY purple_agent_id, purple_agent_name ORDER BY tasks_passed DESC",
+    "query": "SELECT DISTINCT purple_agent_id as id, purple_agent_name FROM read_json_auto('results/*.json') LIMIT 10",
     "columns": [
       { "name": "id", "type": "string", "label": "Agent ID" },
-      { "name": "purple_agent_name", "type": "string", "label": "Agent" },
-      { "name": "total_tasks", "type": "integer", "label": "Tasks" },
-      { "name": "tasks_passed", "type": "integer", "label": "Passed" }
+      { "name": "purple_agent_name", "type": "string", "label": "Agent" }
     ],
-    "sort_by": "tasks_passed",
-    "sort_order": "DESC",
+    "sort_by": "id",
+    "sort_order": "ASC",
     "display_type": "table"
   }
 ]
