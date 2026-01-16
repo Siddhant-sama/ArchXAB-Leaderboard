@@ -2,16 +2,16 @@
   {
     "id": "main_ranking",
     "name": "Main Leaderboard",
-    "description": "Ranking of purple agents by pass rate",
-    "query": "SELECT purple_agent_id as id, purple_agent_name, COUNT(*) as total_tasks, SUM(CASE WHEN task_passed THEN 1 ELSE 0 END) as tasks_passed FROM read_json_auto('results/*.json') GROUP BY purple_agent_id, purple_agent_name ORDER BY tasks_passed DESC",
+    "description": "Purple agent performance ranking",
+    "query": "SELECT purple_agent_id as id, purple_agent_name, task_id, task_passed FROM read_json_auto('results/*.json')",
     "columns": [
       { "name": "id", "type": "string", "label": "Agent ID" },
       { "name": "purple_agent_name", "type": "string", "label": "Agent Name" },
-      { "name": "total_tasks", "type": "integer", "label": "Tasks Evaluated" },
-      { "name": "tasks_passed", "type": "integer", "label": "Tasks Passed" }
+      { "name": "task_id", "type": "string", "label": "Task" },
+      { "name": "task_passed", "type": "boolean", "label": "Passed" }
     ],
-    "sort_by": "tasks_passed",
-    "sort_order": "DESC",
+    "sort_by": "id",
+    "sort_order": "ASC",
     "display_type": "table"
   }
 ]
