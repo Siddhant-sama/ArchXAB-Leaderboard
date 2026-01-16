@@ -57,12 +57,12 @@ jobs:
           USER agent
           WORKDIR /home/agent
           
-          COPY pyproject.toml uv.lock README.md ./
+          COPY pyproject.toml README.md ./
           COPY src src
           
           RUN \
               --mount=type=cache,target=/home/agent/.cache/uv,uid=1000 \
-              uv sync --locked --extra llm
+              uv sync --extra llm
           
           # Entry point runs purple agent
           ENTRYPOINT ["uv", "run", "src/purple_agent/agent.py"]
