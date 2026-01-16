@@ -3,15 +3,16 @@
     "id": "main_ranking",
     "name": "ArchXGreen Leaderboard",
     "description": "Purple agent performance ranking by pass rate",
-    "query": "SELECT purple_agent_id as id, purple_agent_name, COUNT(*) as total_tasks, SUM(CAST(task_passed AS INTEGER)) as tasks_passed, ROUND(100.0 * SUM(CAST(task_passed AS INTEGER)) / COUNT(*), 1) as pass_rate FROM results GROUP BY purple_agent_id, purple_agent_name ORDER BY pass_rate DESC",
+    "query": "SELECT purple_agent_id as id, purple_agent_name, submission_timestamp, COUNT(*) as total_tasks, SUM(CAST(task_passed AS INTEGER)) as tasks_passed, ROUND(100.0 * SUM(CAST(task_passed AS INTEGER)) / COUNT(*), 1) as pass_rate FROM results GROUP BY purple_agent_id, purple_agent_name, submission_timestamp ORDER BY submission_timestamp DESC",
     "columns": [
       { "name": "id", "type": "string", "label": "Agent ID" },
       { "name": "purple_agent_name", "type": "string", "label": "Agent" },
+      { "name": "submission_timestamp", "type": "string", "label": "Submission" },
       { "name": "total_tasks", "type": "integer", "label": "Tasks" },
       { "name": "tasks_passed", "type": "integer", "label": "Passed" },
       { "name": "pass_rate", "type": "float", "label": "Pass Rate (%)" }
     ],
-    "sort_by": "pass_rate",
+    "sort_by": "submission_timestamp",
     "sort_order": "DESC",
     "display_type": "table"
   }
