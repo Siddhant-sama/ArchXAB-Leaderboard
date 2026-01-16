@@ -1,0 +1,58 @@
+{
+  "total_tasks": 6,
+  "passed": 1,
+  "failed": 5,
+  "pass_rate": 0.16666666666666666,
+  "weighted_score": 0.16666666666666666,
+  "execution_time_sec": 57.90325164794922,
+  "results": [
+    {
+      "task_id": "level-1a/aes_sbox",
+      "success": false,
+      "iterations": 1,
+      "passed": 2,
+      "failed": 255,
+      "total": 257
+    },
+    {
+      "task_id": "level-1a/barrel_shifter",
+      "success": false,
+      "iterations": 1,
+      "passed": 0,
+      "failed": 0,
+      "total": 0
+    },
+    {
+      "task_id": "level-1a/cla_8bit",
+      "success": true,
+      "iterations": 1,
+      "passed": 6,
+      "failed": 0,
+      "total": 6
+    },
+    {
+      "task_id": "level-1a/gf2_8_multiplier",
+      "success": false,
+      "iterations": 1,
+      "passed": 0,
+      "failed": 0,
+      "total": 0
+    },
+    {
+      "task_id": "level-1a/lfsr_stream_cipher",
+      "success": false,
+      "iterations": 1,
+      "passed": 0,
+      "failed": 0,
+      "total": 0
+    },
+    {
+      "task_id": "level-1a/rca_32bit",
+      "success": false,
+      "iterations": 1,
+      "passed": 0,
+      "failed": 0,
+      "total": 0
+    }
+  ]
+}
