@@ -1,0 +1,150 @@
+# ArchXGreen Leaderboard - Assessment Scenario
+# 
+# This file defines the reproducible assessment configuration for AgentBeats.
+# It specifies which green agent (evaluator) will test which purple agent(s) (competitors)
+# and the scoring/evaluation rules.
+#
+# Once green and purple agents are registered on AgentBeats, replace the placeholder IDs below.
+
+[metadata]
+name = "ArchXGreen RTL Synthesis Leaderboard"
+description = "Reproducible evaluation scenario for the ArchXGreen benchmark on AgentBeats"
+version = "1.0.0"
+created = "2026-01-16"
+
+# ========== Green Agent (Evaluator) ==========
+# This is the benchmark that evaluates purple agents
+
+[green_agent]
+# TODO: Replace with actual AgentBeats ID after registration
+# Format: agent_<uuid>_<uuid>_<uuid>
+agent_id = "agent_green_archxgreen_rtl_benchmark"
+name = "ArchXGreen Green Agent"
+description = "RTL Synthesis Benchmark Evaluator - Validates Verilog designs across 71 tasks"
+docker_image = "ghcr.io/siddhant-sama/archxgreen:latest"
+port = 9009
+
+[green_agent.capabilities]
+total_tasks = 71
+difficulty_levels = ["level-0", "level-1a", "level-1b", "level-1c", "level-2", "level-3", "level-4", "level-5", "level-6"]
+evaluation_tools = ["Icarus Verilog", "Yosys"]
+features = ["dynamic_loading", "feedback_generation", "architectural_validation", "ppa_metrics"]
+
+# ========== Purple Agent(s) (Competitors) ==========
+# These are the agents being evaluated against the green agent
+
+[[purple_agents]]
+# TODO: Replace with actual AgentBeats ID after registration
+agent_id = "agent_purple_baseline_lmm_verilog"
+name = "ArchXGreen Baseline Purple Agent"
+description = "LLM-driven Verilog generator demonstrating iterative problem solving"
+docker_image = "ghcr.io/siddhant-sama/archxgreen/purple:latest"
+port = 9009
+enabled = true
+
+[purple_agents.configuration]
+backend = "openai"  # Can be: openai, anthropic, gemini
+max_iterations = 5
+timeout_seconds = 300
+
+# ========== Evaluation Configuration ==========
+
+[evaluation]
+# Scoring method
+scoring_method = "weighted_difficulty"
+max_score = 71
+
+# Difficulty weights (cumulative)
+[evaluation.difficulty_weights]
+"level-0" = 1
+"level-1a" = 2
+"level-1b" = 3
+"level-1c" = 4
+"level-2" = 5
+"level-3" = 6
+"level-4" = 7
+"level-5" = 8
+"level-6" = 10
+
+# Resource constraints per task
+[evaluation.constraints]
+timeout_seconds = 300
+memory_limit_mb = 2048
+verilog_size_limit_kb = 512
+
+# Evaluation features
+[evaluation.features]
+dynamic_loading = true
+feedback_generation = true
+architectural_validation = true
+ppa_metrics = true
+llm_validation = false
+
+# ========== Leaderboard Configuration ==========
+
+[leaderboard]
+# Multiple submissions and best-score tracking
+enable_submissions = true
+track_best_score = true
+allow_retries = true
+
+# Scoring rules for display
+score_calculation = "sum(tasks_passed * difficulty_weight) / total_weight"
+completion_rate_calculation = "tasks_passed / total_tasks"
+
+# Display options
+show_completion_by_level = true
+rank_by_score = true
+show_pass_rate = true
+show_weighted_score = true
+
+# ========== Results Configuration ==========
+
+[results]
+# Where to store assessment results
+results_dir = "results"
+submissions_dir = "submissions"
+
+# Result format
+format = "json"
+include_logs = true
+include_feedback = true
+include_metrics = true
+
+# ========== GitHub Actions ==========
+
+[github_actions]
+# Workflow configuration
+workflow_file = ".github/workflows/scenario-runner.yml"
+trigger_on = "push"  # Trigger on branch push
+require_approval = true  # Require green agent approval before merge
+
+# Environment variables/secrets needed
+[[github_actions.required_secrets]]
+name = "GITHUB_TOKEN"
+description = "GitHub token for workflow access (auto-provided)"
+
+[[github_actions.optional_secrets]]
+name = "OPENAI_API_KEY"
+description = "OpenAI API key for purple agent (if using OpenAI backend)"
+
+[[github_actions.optional_secrets]]
+name = "ANTHROPIC_API_KEY"
+description = "Anthropic API key for purple agent (if using Anthropic backend)"
+
+# ========== Phase Information ==========
+
+[phase]
+number = 1
+deadline = "2026-01-15"
+description = "Initial submission with baseline purple agent"
+status = "open"
+
+# ========== Integration ==========
+
+[agentbeats]
+# AgentBeats platform integration
+platform = "https://agentbeats.dev"
+# TODO: Webhook URL will be provided after green agent registration
+webhook_url = "https://agentbeats.dev/webhook/..."
+webhook_secret = "GITHUB_SECRET"  # Store actual secret as GitHub repo secret

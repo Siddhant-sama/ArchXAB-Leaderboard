@@ -1,0 +1,167 @@
+name: Scenario Runner
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scenario.toml'
+      - '.github/workflows/scenario-runner.yml'
+  workflow_dispatch:
+    inputs:
+      purple_agent:
+        description: 'Which purple agent to run (or "all")'
+        required: false
+        default: 'all'
+
+jobs:
+  run-scenario:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Pull green agent image
+        run: |
+          docker pull ghcr.io/siddhant-sama/archxgreen:latest
+          docker tag ghcr.io/siddhant-sama/archxgreen:latest green-agent:latest
+      
+      - name: Pull purple agent image
+        run: |
+          docker pull ghcr.io/siddhant-sama/archxgreen/purple:latest
+          docker tag ghcr.io/siddhant-sama/archxgreen/purple:latest purple-agent:latest
+      
+      - name: Create results directory
+        run: |
+          mkdir -p results
+          mkdir -p submissions
+      
+      - name: Run green agent (baseline)
+        id: baseline
+        continue-on-error: true
+        run: |
+          echo "Running baseline purple agent against green agent..."
+          
+          # Start green agent in background
+          docker run -d \
+            --name green-agent \
+            -p 9009:9009 \
+            green-agent:latest
+          
+          # Give it time to start
+          sleep 5
+          
+          # Check health
+          curl -f http://localhost:9009/health || exit 1
+          
+          # Get task count
+          TASK_COUNT=$(curl -s http://localhost:9009/health | jq '.total_tasks')
+          echo "Green agent ready with $TASK_COUNT tasks"
+          
+          # Start purple agent
+          docker run -d \
+            --name purple-agent \
+            --network host \
+            -e OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
+            -e ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
+            purple-agent:latest
+          
+          sleep 3
+          
+          echo "Agents started successfully"
+      
+      - name: Collect results
+        if: steps.baseline.outcome == 'success'
+        id: results
+        run: |
+          # Generate result timestamp
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          RESULT_FILE="results/baseline-${TIMESTAMP}.json"
+          
+          # Simulate results collection (in production, query agents here)
+          cat > "$RESULT_FILE" <<EOF
+          {
+            "timestamp": "$TIMESTAMP",
+            "green_agent": {
+              "name": "ArchXGreen Green Agent",
+              "status": "running"
+            },
+            "purple_agents": [
+              {
+                "name": "ArchXGreen Baseline Purple Agent",
+                "status": "running"
+              }
+            ],
+            "tasks_evaluated": 0,
+            "tasks_passed": 0,
+            "status": "in_progress",
+            "note": "Full assessment would run here against all 71 tasks"
+          }
+          EOF
+          
+          echo "result_file=$RESULT_FILE" >> $GITHUB_OUTPUT
+      
+      - name: Generate submission record
+        if: steps.results.outcome == 'success'
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          SUBMISSION_FILE="submissions/submission-${TIMESTAMP}.json"
+          
+          cat > "$SUBMISSION_FILE" <<EOF
+          {
+            "timestamp": "$TIMESTAMP",
+            "git_commit": "${{ github.sha }}",
+            "git_branch": "${{ github.ref }}",
+            "github_run_id": "${{ github.run_id }}",
+            "github_actor": "${{ github.actor }}",
+            "green_agent": "ArchXGreen Green Agent",
+            "purple_agents": ["ArchXGreen Baseline Purple Agent"],
+            "result_file": "$(cat ${{ steps.results.outputs.result_file }} | jq -r '.timestamp')",
+            "status": "completed"
+          }
+          EOF
+      
+      - name: Clean up containers
+        if: always()
+        run: |
+          docker stop green-agent || true
+          docker stop purple-agent || true
+          docker rm green-agent || true
+          docker rm purple-agent || true
+      
+      - name: Create pull request with results
+        if: github.ref == 'refs/heads/main' && steps.results.outcome == 'success'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: "ci: Add assessment results from workflow run ${{ github.run_id }}"
+          title: "Assessment Results - ${{ github.run_id }}"
+          body: |
+            # Assessment Results
+            
+            Automated assessment results from GitHub Actions run.
+            
+            - **Run ID:** ${{ github.run_id }}
+            - **Commit:** ${{ github.sha }}
+            - **Actor:** ${{ github.actor }}
+            
+            Results stored in:
+            - `results/`
+            - `submissions/`
+            
+            **Note:** Please review and approve results before merging to sync with AgentBeats leaderboard.
+          branch: assessment-results-${{ github.run_id }}
+          delete-branch: true
