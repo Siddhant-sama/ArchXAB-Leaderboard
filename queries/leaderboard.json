@@ -1,5 +1,4 @@
-{
-  "leaderboard_queries": [
+[
     {
       "id": "main_ranking",
       "name": "Main Leaderboard",
@@ -139,19 +138,4 @@
       "sort_order": "DESC",
       "display_type": "scatter"
     }
-  ],
-  "metadata": {
-    "benchmark": "ArchXGreen RTL Synthesis",
-    "total_tasks": 71,
-    "difficulty_levels": 9,
-    "evaluation_tools": ["Icarus Verilog", "Yosys"],
-    "features": [
-      "dynamic_loading",
-      "feedback_generation",
-      "architectural_validation",
-      "ppa_metrics"
-    ],
-    "created": "2026-01-16",
-    "version": "1.0.0"
-  }
-}
+]
