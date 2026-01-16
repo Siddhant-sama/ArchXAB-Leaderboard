@@ -1,10 +1,10 @@
 {
   "total_tasks": 20,
-  "passed": 12,
-  "failed": 8,
-  "pass_rate": 0.6,
-  "weighted_score": 0.6,
-  "execution_time_sec": 72.85007166862488,
+  "passed": 11,
+  "failed": 9,
+  "pass_rate": 0.55,
+  "weighted_score": 0.55,
+  "execution_time_sec": 78.85889887809753,
   "results": [
     {
       "task_id": "level-0/binary-encoder",
@@ -48,10 +48,10 @@
     },
     {
       "task_id": "level-0/decoder-2to4",
-      "success": true,
+      "success": false,
       "iterations": 1,
-      "passed": 6,
-      "failed": 0,
+      "passed": 0,
+      "failed": 6,
       "total": 6
     },
     {
