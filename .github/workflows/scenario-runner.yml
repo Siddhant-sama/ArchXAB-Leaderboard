@@ -153,8 +153,14 @@ jobs:
           fi
       
       - name: Post results to AgentBeats webhook
-        if: steps.evaluation.outcome == 'success'
+        if: always()
         run: |
+          # Only post if results file exists
+          if [ ! -f results/evaluation_results.json ]; then
+            echo "No results file found, skipping webhook"
+            exit 0
+          fi
+          
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           
           # Build webhook payload
@@ -166,10 +172,10 @@ jobs:
             "submission_timestamp": "$TIMESTAMP",
             "github_commit_sha": "${{ github.sha }}",
             "github_actor": "${{ github.actor }}",
-            "tasks_evaluated": ${{ steps.evaluation.outputs.tasks_total }},
-            "tasks_passed": ${{ steps.evaluation.outputs.tasks_passed }},
-            "pass_rate": ${{ steps.evaluation.outputs.pass_rate }},
-            "execution_time_sec": ${{ steps.evaluation.outputs.exec_time }},
+            "tasks_evaluated": $(jq -r '.total_tasks' results/evaluation_results.json),
+            "tasks_passed": $(jq -r '.passed' results/evaluation_results.json),
+            "pass_rate": $(jq -r '.pass_rate' results/evaluation_results.json),
+            "execution_time_sec": $(jq -r '.execution_time_sec' results/evaluation_results.json),
             "results_file": "results/evaluation_results.json",
             "status": "completed"
           }
